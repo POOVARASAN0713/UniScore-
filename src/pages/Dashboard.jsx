@@ -5,20 +5,9 @@ import {
   BookOpen, 
   Calendar, 
   Compass, 
-  Download, 
   FileText, 
-  TrendingUp,
   AlertCircle
 } from 'lucide-react';
-import { 
-  AreaChart, 
-  Area, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer 
-} from 'recharts';
 import html2pdf from 'html2pdf.js';
 
 export default function Dashboard({ setCurrentPage }) {
@@ -179,111 +168,72 @@ export default function Dashboard({ setCurrentPage }) {
           </div>
         </div>
 
-        {/* Analytics Details Grid */}
-        <div className="grid gap-6 lg:grid-cols-3">
-          {/* Chart Card */}
-          <div className="glass-card rounded-2xl p-6 lg:col-span-2 space-y-4">
-            <div className="flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-indigo-500" />
-              <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">SGPA Trend Analysis</h3>
-            </div>
-            <div className="w-full h-72 pdf-chart-container">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart
-                  data={chartData}
-                  margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-                >
-                  <defs>
-                    <linearGradient id="colorSgpa" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#6366f1" stopOpacity={0.4}/>
-                      <stop offset="95%" stopColor="#6366f1" stopOpacity={0.0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(156,163,175,0.15)" />
-                  <XAxis 
-                    dataKey="name" 
-                    stroke="rgba(156,163,175,0.6)"
-                    fontSize={11}
-                    tickLine={false}
-                  />
-                  <YAxis 
-                    domain={[0, 10]} 
-                    ticks={[0, 2, 4, 6, 8, 10]} 
-                    stroke="rgba(156,163,175,0.6)"
-                    fontSize={11}
-                    tickLine={false}
-                  />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: 'rgba(30, 41, 59, 0.9)', 
-                      border: 'none',
-                      borderRadius: '8px',
-                      color: '#f8fafc',
-                      fontSize: '12px'
-                    }}
-                  />
-                  <Area 
-                    type="monotone" 
-                    dataKey="SGPA" 
-                    stroke="#6366f1" 
-                    strokeWidth={3}
-                    fillOpacity={1} 
-                    fill="url(#colorSgpa)" 
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
+        {/* Semester-wise SGPA Breakdown Table */}
+        <div className="glass-card rounded-2xl p-6 mt-6 space-y-4">
+          <div className="flex items-center gap-2">
+            <Calendar className="w-5 h-5 text-indigo-500" />
+            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 font-sans">Semester Performance Summary</h3>
           </div>
-
-          {/* Semesters list summary */}
-          <div className="glass-card rounded-2xl p-6 flex flex-col space-y-4">
-            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100">Term Breakdown</h3>
-            <div className="flex-1 overflow-y-auto max-h-72 pr-1 space-y-3">
-              {semesters.map((sem) => (
-                <div key={sem.id} className="flex items-center justify-between p-3 rounded-xl bg-slate-100/40 dark:bg-slate-800/30 border border-slate-200/30 dark:border-slate-800/30">
-                  <div>
-                    <h5 className="font-semibold text-sm text-slate-800 dark:text-slate-200">{sem.name}</h5>
-                    <p className="text-xs text-slate-500">{sem.subjects?.length || 0} Subjects · {sem.totalCredits} Credits</p>
-                  </div>
-                  <div className="text-right">
-                    <span className="font-bold text-base text-indigo-500 dark:text-indigo-400">{sem.sgpa.toFixed(2)}</span>
-                    <span className="block text-[10px] text-slate-400">SGPA</span>
-                  </div>
-                </div>
-              ))}
-            </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-slate-200/50 dark:border-slate-800/50 text-xs font-bold text-slate-400 uppercase">
+                  <th className="py-3 px-2">Semester</th>
+                  <th className="py-3 px-2 text-center">Subjects Completed</th>
+                  <th className="py-3 px-2 text-center">Total Credits</th>
+                  <th className="py-3 px-2 text-right">SGPA</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100/50 dark:divide-slate-850/50">
+                {semesters.map((sem) => (
+                  <tr key={sem.id} className="text-sm text-slate-700 dark:text-slate-300">
+                    <td className="py-3 px-2 font-semibold text-slate-800 dark:text-slate-200">{sem.name}</td>
+                    <td className="py-3 px-2 text-center">{sem.subjects?.length || 0}</td>
+                    <td className="py-3 px-2 text-center">{sem.totalCredits}</td>
+                    <td className="py-3 px-2 text-right font-bold text-indigo-500 dark:text-indigo-400 text-lg">
+                      {sem.sgpa.toFixed(2)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
 
-        {/* Detailed Mark Summary Table for PDF */}
-        <div className="pdf-only mt-8 bg-white p-6 rounded-2xl border border-slate-200">
-          <h3 className="text-xl font-bold text-slate-800 mb-4 border-b pb-2">Detailed Academic Record</h3>
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-slate-300 text-slate-500 text-xs uppercase bg-slate-50">
-                <th className="py-3 px-2">Semester</th>
-                <th className="py-3 px-2">Code</th>
-                <th className="py-3 px-2">Subject Name</th>
-                <th className="py-3 px-2 text-center">Credits</th>
-                <th className="py-3 px-2 text-center">Grade</th>
-                <th className="py-3 px-2 text-center">Grade Point</th>
-              </tr>
-            </thead>
-            <tbody>
-              {semesters.map(sem => 
-                sem.subjects.map((sub, idx) => (
-                  <tr key={`${sem.id}-${sub.code}`} className="border-b border-slate-100 text-sm text-slate-700">
-                    <td className="py-3 px-2 font-bold text-slate-800">{idx === 0 ? sem.name : ''}</td>
-                    <td className="py-3 px-2 font-mono text-xs">{sub.code}</td>
-                    <td className="py-3 px-2">{sub.name}</td>
-                    <td className="py-3 px-2 text-center">{sub.credits}</td>
-                    <td className="py-3 px-2 text-center font-bold text-indigo-600">{sub.grade}</td>
-                    <td className="py-3 px-2 text-center font-semibold">{sub.gradePoint}</td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+        {/* Detailed Mark Summary Table */}
+        <div className="glass-card rounded-2xl p-6 mt-6 space-y-4">
+          <div className="flex items-center gap-2">
+            <BookOpen className="w-5 h-5 text-indigo-500" />
+            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 font-sans">Detailed Academic Record</h3>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-slate-200/50 dark:border-slate-800/50 text-xs font-bold text-slate-400 uppercase bg-slate-100/30 dark:bg-slate-800/30">
+                  <th className="py-3 px-2">Semester</th>
+                  <th className="py-3 px-2">Code</th>
+                  <th className="py-3 px-2">Subject Name</th>
+                  <th className="py-3 px-2 text-center">Credits</th>
+                  <th className="py-3 px-2 text-center">Grade</th>
+                  <th className="py-3 px-2 text-center">Grade Point</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100/50 dark:divide-slate-850/50">
+                {semesters.map(sem => 
+                  sem.subjects.map((sub, idx) => (
+                    <tr key={`${sem.id}-${sub.code}`} className="text-sm text-slate-700 dark:text-slate-300">
+                      <td className="py-3 px-2 font-bold text-slate-800 dark:text-slate-200">{idx === 0 ? sem.name : ''}</td>
+                      <td className="py-3 px-2 font-mono text-xs">{sub.code}</td>
+                      <td className="py-3 px-2">{sub.name}</td>
+                      <td className="py-3 px-2 text-center">{sub.credits}</td>
+                      <td className="py-3 px-2 text-center font-bold text-indigo-600 dark:text-indigo-400">{sub.grade}</td>
+                      <td className="py-3 px-2 text-center font-semibold">{sub.gradePoint}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
