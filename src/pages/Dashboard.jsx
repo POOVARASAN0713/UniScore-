@@ -12,7 +12,7 @@ import html2pdf from 'html2pdf.js';
 
 export default function Dashboard({ setCurrentPage }) {
   const { dashboardData } = useAuth();
-  const pdfContentRef = useRef();
+  const transcriptRef = useRef();
 
   const semesters = dashboardData?.semesters || [];
   const cgpa = dashboardData?.cgpa || 0;
@@ -28,19 +28,19 @@ export default function Dashboard({ setCurrentPage }) {
 
   // Handle PDF Export
   const exportPDF = () => {
-    const element = pdfContentRef.current;
+    const element = transcriptRef.current;
     const opt = {
-      margin: 10,
-      filename: `${dashboardData.name || 'Student'}_Academic_Report.pdf`,
+      margin: 15,
+      filename: `${dashboardData.name || 'Student'}_Academic_Transcript.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 2, useCORS: true },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
     
-    // Temporarily add a class for PDF generation to adjust styling
-    element.classList.add('pdf-mode');
+    // Temporarily make visible for rendering
+    element.style.display = 'block';
     html2pdf().from(element).set(opt).save().then(() => {
-      element.classList.remove('pdf-mode');
+      element.style.display = 'none';
     });
   };
 
@@ -97,17 +97,7 @@ export default function Dashboard({ setCurrentPage }) {
       </div>
 
       {/* Main Stats and Graphs Container for PDF */}
-      <div ref={pdfContentRef} className="space-y-6 p-1 rounded-xl">
-        {/* PDF Only Header */}
-        <div className="hidden pdf-only flex-row justify-between items-center border-b pb-4 mb-6 border-slate-200">
-          <div>
-            <h1 className="text-2xl font-bold text-indigo-600">UniScore CGPA Report</h1>
-            <p className="text-xs text-slate-500">Student: {dashboardData?.name} ({dashboardData?.email})</p>
-          </div>
-          <div className="text-right">
-            <span className="text-xs text-slate-400">Date: {new Date().toLocaleDateString()}</span>
-          </div>
-        </div>
+      <div className="space-y-6 p-1 rounded-xl">
 
         {/* Stats Grid */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -233,6 +223,84 @@ export default function Dashboard({ setCurrentPage }) {
                 )}
               </tbody>
             </table>
+          </div>
+        </div>
+
+        {/* Hidden Clean Text Transcript for PDF Export */}
+        <div 
+          ref={transcriptRef} 
+          style={{ 
+            display: 'none', 
+            position: 'absolute',
+            left: '-9999px',
+            top: '0',
+            width: '794px',
+            fontFamily: 'serif', 
+            color: '#000', 
+            backgroundColor: '#fff', 
+            padding: '40px',
+            boxSizing: 'border-box'
+          }}
+        >
+          <div style={{ textAlign: 'center', marginBottom: '20px', borderBottom: '2px solid #000', paddingBottom: '10px' }}>
+            <h1 style={{ fontSize: '24px', fontWeight: 'bold', margin: '0 0 5px 0', textTransform: 'uppercase' }}>Academic Transcript</h1>
+            <p style={{ fontSize: '14px', margin: '0', color: '#555' }}>UniScore CGPA Calculator System</p>
+          </div>
+
+          <table style={{ width: '100%', marginBottom: '25px', fontSize: '14px' }}>
+            <tbody>
+              <tr>
+                <td style={{ padding: '6px 0', fontWeight: 'bold', width: '120px' }}>Student Name:</td>
+                <td style={{ padding: '6px 0' }}>{dashboardData?.name}</td>
+                <td style={{ padding: '6px 0', fontWeight: 'bold', width: '150px' }}>Cumulative CGPA:</td>
+                <td style={{ padding: '6px 0', fontWeight: 'bold', fontSize: '16px' }}>{cgpa.toFixed(2)}</td>
+              </tr>
+              <tr>
+                <td style={{ padding: '6px 0', fontWeight: 'bold' }}>Email Address:</td>
+                <td style={{ padding: '6px 0' }}>{dashboardData?.email}</td>
+                <td style={{ padding: '6px 0', fontWeight: 'bold' }}>Total Credits Earned:</td>
+                <td style={{ padding: '6px 0' }}>{totalCredits}</td>
+              </tr>
+              <tr>
+                <td style={{ padding: '6px 0', fontWeight: 'bold' }}>Report Date:</td>
+                <td style={{ padding: '6px 0' }}>{new Date().toLocaleDateString()}</td>
+                <td style={{ padding: '6px 0', fontWeight: 'bold' }}>Semesters Completed:</td>
+                <td style={{ padding: '6px 0' }}>{semesters.length}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3 style={{ fontSize: '16px', fontWeight: 'bold', borderBottom: '1px solid #ddd', paddingBottom: '5px', marginBottom: '10px', textTransform: 'uppercase' }}>Subject-wise Grade Log</h3>
+          
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+            <thead>
+              <tr style={{ borderBottom: '2px solid #000', borderTop: '2px solid #000', textAlign: 'left', backgroundColor: '#f9f9f9' }}>
+                <th style={{ padding: '8px 4px', fontWeight: 'bold' }}>Semester</th>
+                <th style={{ padding: '8px 4px', fontWeight: 'bold' }}>Subject Code</th>
+                <th style={{ padding: '8px 4px', fontWeight: 'bold' }}>Subject Name</th>
+                <th style={{ padding: '8px 4px', fontWeight: 'bold', textAlign: 'center' }}>Credits</th>
+                <th style={{ padding: '8px 4px', fontWeight: 'bold', textAlign: 'center' }}>Grade</th>
+                <th style={{ padding: '8px 4px', fontWeight: 'bold', textAlign: 'center' }}>Grade Point</th>
+              </tr>
+            </thead>
+            <tbody>
+              {semesters.map(sem => 
+                sem.subjects.map((sub, idx) => (
+                  <tr key={`${sem.id}-${sub.code}`} style={{ borderBottom: '1px solid #eee' }}>
+                    <td style={{ padding: '8px 4px', fontWeight: idx === 0 ? 'bold' : 'normal' }}>{idx === 0 ? sem.name : ''}</td>
+                    <td style={{ padding: '8px 4px', fontFamily: 'monospace' }}>{sub.code}</td>
+                    <td style={{ padding: '8px 4px' }}>{sub.name}</td>
+                    <td style={{ padding: '8px 4px', textAlign: 'center' }}>{sub.credits}</td>
+                    <td style={{ padding: '8px 4px', textAlign: 'center', fontWeight: 'bold' }}>{sub.grade}</td>
+                    <td style={{ padding: '8px 4px', textAlign: 'center' }}>{sub.gradePoint}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+
+          <div style={{ marginTop: '40px', fontSize: '11px', color: '#777', borderTop: '1px dashed #ccc', paddingTop: '10px', textAlign: 'center' }}>
+            This is a computer-generated academic transcript generated via UniScore CGPA Calculator.
           </div>
         </div>
       </div>
