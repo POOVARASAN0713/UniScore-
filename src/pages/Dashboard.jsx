@@ -55,33 +55,7 @@ export default function Dashboard({ setCurrentPage }) {
     });
   };
 
-  // Handle CSV Download
-  const downloadCSV = () => {
-    let csvContent = 'data:text/csv;charset=utf-8,';
-    csvContent += 'Semester,Subject Code,Subject Name,Credits,Grade,Grade Point\n';
 
-    semesters.forEach(sem => {
-      sem.subjects.forEach(sub => {
-        const row = [
-          `"${sem.name}"`,
-          `"${sub.code}"`,
-          `"${sub.name}"`,
-          sub.credits,
-          `"${sub.grade}"`,
-          sub.gradePoint
-        ].join(',');
-        csvContent += row + '\n';
-      });
-    });
-
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `${dashboardData?.name || 'Student'}_mark_summary.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
 
   if (semesters.length === 0) {
     return (
@@ -123,13 +97,6 @@ export default function Dashboard({ setCurrentPage }) {
           <p className="text-sm text-slate-500 dark:text-slate-400">Real-time performance tracking and reports.</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <button
-            onClick={downloadCSV}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold transition-all rounded-xl glass-card text-slate-700 dark:text-slate-350 hover:bg-slate-200/50 dark:hover:bg-slate-800/50"
-          >
-            <Download className="w-4 h-4 text-indigo-500" />
-            Download CSV
-          </button>
           <button
             onClick={exportPDF}
             className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white transition-all bg-indigo-600 rounded-xl shadow-md hover:bg-indigo-500 hover:shadow-indigo-600/20"
@@ -289,29 +256,29 @@ export default function Dashboard({ setCurrentPage }) {
         </div>
 
         {/* Detailed Mark Summary Table for PDF */}
-        <div className="hidden pdf-only block mt-8">
-          <h3 className="text-lg font-bold text-slate-800 mb-4">Detailed Academic Record</h3>
+        <div className="pdf-only mt-8 bg-white p-6 rounded-2xl border border-slate-200">
+          <h3 className="text-xl font-bold text-slate-800 mb-4 border-b pb-2">Detailed Academic Record</h3>
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-300 text-slate-500 text-xs uppercase">
-                <th className="py-2">Semester</th>
-                <th className="py-2">Code</th>
-                <th className="py-2">Subject</th>
-                <th className="py-2 text-center">Credits</th>
-                <th className="py-2 text-center">Grade</th>
-                <th className="py-2 text-center">Points</th>
+              <tr className="border-b border-slate-300 text-slate-500 text-xs uppercase bg-slate-50">
+                <th className="py-3 px-2">Semester</th>
+                <th className="py-3 px-2">Code</th>
+                <th className="py-3 px-2">Subject Name</th>
+                <th className="py-3 px-2 text-center">Credits</th>
+                <th className="py-3 px-2 text-center">Grade</th>
+                <th className="py-3 px-2 text-center">Grade Point</th>
               </tr>
             </thead>
             <tbody>
               {semesters.map(sem => 
                 sem.subjects.map((sub, idx) => (
                   <tr key={`${sem.id}-${sub.code}`} className="border-b border-slate-100 text-sm text-slate-700">
-                    <td className="py-2 font-medium">{idx === 0 ? sem.name : ''}</td>
-                    <td className="py-2">{sub.code}</td>
-                    <td className="py-2">{sub.name}</td>
-                    <td className="py-2 text-center">{sub.credits}</td>
-                    <td className="py-2 text-center font-bold">{sub.grade}</td>
-                    <td className="py-2 text-center">{sub.gradePoint}</td>
+                    <td className="py-3 px-2 font-bold text-slate-800">{idx === 0 ? sem.name : ''}</td>
+                    <td className="py-3 px-2 font-mono text-xs">{sub.code}</td>
+                    <td className="py-3 px-2">{sub.name}</td>
+                    <td className="py-3 px-2 text-center">{sub.credits}</td>
+                    <td className="py-3 px-2 text-center font-bold text-indigo-600">{sub.grade}</td>
+                    <td className="py-3 px-2 text-center font-semibold">{sub.gradePoint}</td>
                   </tr>
                 ))
               )}

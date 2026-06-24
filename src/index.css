@@ -76,3 +76,16 @@
 .pdf-chart-container {
   min-height: 250px;
 }
+
+/* Print Utilities for PDF Exports */
+.pdf-only {
+  display: none !important;
+}
+
+.pdf-mode .pdf-only {
+  display: block !important;
+}
+
+.pdf-mode .screen-only {
+  display: none !important;
+}
